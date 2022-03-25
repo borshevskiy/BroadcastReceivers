@@ -6,9 +6,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.borshevskiy.broadcastreceivers.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private val localBroadcastReceiver by lazy {
+        LocalBroadcastManager.getInstance(this)
+    }
 
     private lateinit var binding: ActivityMainBinding
     private val receiver = object : BroadcastReceiver() {
@@ -26,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.button.setOnClickListener {
-            sendBroadcast(Intent(MyReceiver.ACTION_CLICKED).putExtra("Click",++click))
+            localBroadcastReceiver.sendBroadcast(Intent(MyReceiver.ACTION_CLICKED).putExtra("Click",++click))
         }
         val intentFilter = IntentFilter().apply {
             addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED)
@@ -34,12 +39,12 @@ class MainActivity : AppCompatActivity() {
             addAction(MyReceiver.ACTION_CLICKED)
             addAction(MyReceiver.ACTION_LOADED)
         }
-        registerReceiver(receiver, intentFilter)
+        localBroadcastReceiver.registerReceiver(receiver, intentFilter)
         startService(Intent(this, MyService::class.java))
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(receiver)
+        localBroadcastReceiver.unregisterReceiver(receiver)
     }
 }
